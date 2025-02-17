@@ -6,6 +6,9 @@ import { loadEnv, defineConfig, Modules } from "@medusajs/framework/utils";
 loadEnv(process.env.NODE_ENV!, process.cwd());
 
 module.exports = defineConfig({
+  // admin: {
+  //   disable: true,
+  // },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {

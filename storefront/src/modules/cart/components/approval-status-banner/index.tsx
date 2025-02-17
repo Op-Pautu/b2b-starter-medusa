@@ -17,7 +17,7 @@ const ApprovalStatusBanner = ({ cart }: { cart: B2BCart }) => {
         <>
           <LockClosedSolid className="w-4 h-4" />
           <Text className="text-left">This cart is locked for approval.</Text>
-        </>
+        </> 
       )}
 
       {cartApprovalStatus === ApprovalStatusType.REJECTED && (
