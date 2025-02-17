@@ -9,8 +9,8 @@ import { validateQuoteAcceptanceStep } from "../steps/validate-quote-acceptance"
 import { updateQuotesWorkflow } from "./update-quote";
 
 /*
-  A workflow that accepts a quote by a customer. 
-  
+  A workflow that accepts a quote by a customer.
+
   Once the customer accepts the quote, any staged changes made on the draft order is then committed.
   The draft order is then converted to an actual order ready for processing.
 */
