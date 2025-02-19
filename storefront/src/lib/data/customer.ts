@@ -58,6 +58,121 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
+interface OtpResponse {
+  success: boolean
+  error: null | string
+  otp?: string
+  mobileOtpTableId?: string
+}
+
+interface VerificationResponse {
+  success: boolean
+  error: null | string
+  token?: string
+  customer?: any
+}
+
+export async function sendOtp(
+  _currentState: unknown,
+  formData: FormData
+): Promise<OtpResponse> {
+  const phone = formData.get("phone_number") as string
+  console.log({ phone })
+  if (!phone?.trim()) {
+    return {
+      success: false,
+      error: "Phone number is required",
+    }
+  }
+
+  try {
+    const res = await sdk.client.fetch<OtpResponse>(
+      `/store/login-with-otp/register`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { phone },
+      }
+    )
+
+    const { error, success, otp, mobileOtpTableId } = res
+    if (res.error) {
+      throw new Error(res.error)
+    }
+
+    console.log("otp:", otp)
+    console.log("mobileOtpTableId:", mobileOtpTableId)
+
+    return {
+      success: true,
+      error: null,
+      otp: otp,
+      // mobileOtpTableId: mobileOtpTable.id,
+    }
+  } catch (err) {
+    console.error("OTP Request Error:", err)
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to send OTP",
+    }
+  }
+}
+
+export async function otpVerification(
+  _currentState: unknown,
+  formData: FormData
+): Promise<VerificationResponse> {
+  const otpTableId = formData.get("mobileOtpTableId") as string
+  const otpValue = formData.get("otp") as string
+
+  if (!otpValue?.trim() || !otpTableId?.trim()) {
+    return {
+      success: false,
+      error: "OTP and table ID are required",
+    }
+  }
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/login-with-otp/verify`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          otp: otpValue,
+          otpTableId: otpTableId,
+        }),
+        cache: "no-store",
+      }
+    )
+
+    if (!res.ok) {
+      const error = await res.text()
+      throw new Error(error)
+    }
+
+    const data = await res.json()
+
+    if (data.token) {
+      setAuthToken(data.token)
+      track("customer_logged_in")
+    }
+
+    return {
+      success: true,
+      error: null,
+      token: data.token,
+      customer: data.customer,
+    }
+  } catch (err) {
+    console.error("OTP Verification Error:", err)
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Verification failed",
+    }
+  }
+}
+
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
   const customerForm = {

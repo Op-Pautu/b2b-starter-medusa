@@ -57,7 +57,7 @@ const LoginTemplate = ({ regions }: { regions: HttpTypes.StoreRegion[] }) => {
         {currentView === LOGIN_VIEW.LOG_IN ? (
           <Login setCurrentView={updateView} />
         ) : (
-          <Register setCurrentView={updateView} regions={regions} />
+          <Register setCurrentView={updateView} />
         )}
       </div>
 

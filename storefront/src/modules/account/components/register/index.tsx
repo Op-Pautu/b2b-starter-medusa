@@ -1,33 +1,20 @@
 "use client"
 
-import { signup } from "@lib/data/customer"
-import { Checkbox, Label, Select, Text } from "@medusajs/ui"
+import { sendOtp, signup } from "@lib/data/customer"
+import { Text } from "@medusajs/ui"
 
-import { currencySymbolMap } from "@lib/constants"
-import { HttpTypes } from "@medusajs/types"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
-import { useActionState, useState } from "react"
+import { useActionState, } from "react"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
-  regions: HttpTypes.StoreRegion[]
 }
 
-const Register = ({ setCurrentView, regions }: Props) => {
-  const [message, formAction] = useActionState(signup, null)
-  const [termsAccepted, setTermsAccepted] = useState(false)
-
-  const countryNames = regions
-    .map((region) =>
-      region.countries?.map((country) => country?.display_name || country?.name)
-    )
-    .flat()
-    .filter((country) => country !== undefined)
-
-  const currencies = regions.map((region) => region.currency_code)
+const Register = ({ setCurrentView }: Props) => {
+  const [message, formAction] = useActionState(sendOtp, null)
 
   return (
     <div
@@ -42,31 +29,14 @@ const Register = ({ setCurrentView, regions }: Props) => {
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-4">
           <Input
-            label="Email"
-            name="email"
+            label="Phone Number"
+            name="phone_number"
             required
-            type="email"
-            autoComplete="email"
-            data-testid="email-input"
+            autoComplete="phone-number"
+            data-testid="phone-number-input"
             className="bg-white"
           />
-          <Input
-            label="First name"
-            name="first_name"
-            required
-            autoComplete="given-name"
-            data-testid="first-name-input"
-            className="bg-white"
-          />
-          <Input
-            label="Last name"
-            name="last_name"
-            required
-            autoComplete="family-name"
-            data-testid="last-name-input"
-            className="bg-white"
-          />
-          <Input
+          {/* <Input
             label="Company name"
             name="company_name"
             required
@@ -74,85 +44,19 @@ const Register = ({ setCurrentView, regions }: Props) => {
             data-testid="company-name-input"
             className="bg-white"
           />
-          <Input
-            label="Password"
-            name="password"
-            required
-            type="password"
-            autoComplete="new-password"
-            data-testid="password-input"
-            className="bg-white"
-          />
-          <Input
-            label="Company address"
-            name="company_address"
-            required
-            autoComplete="address"
-            data-testid="company-address-input"
-            className="bg-white"
-          />
-          <Input
-            label="Company city"
-            name="company_city"
-            required
-            autoComplete="city"
-            data-testid="company-city-input"
-            className="bg-white"
-          />
-          <Input
-            label="Company state"
-            name="company_state"
-            required
-            autoComplete="state"
-            data-testid="company-state-input"
-            className="bg-white"
-          />
-          <Input
-            label="Company zip"
-            name="company_zip"
-            required
-            autoComplete="postal-code"
-            data-testid="company-zip-input"
-            className="bg-white"
-          />
-          <Select
-            name="company_country"
-            required
-            autoComplete="country"
-            data-testid="company-country-input"
-          >
-            <Select.Trigger className="rounded-full h-10 px-4">
-              <Select.Value placeholder="Select a country" />
-            </Select.Trigger>
-            <Select.Content>
-              {countryNames?.map((country) => (
-                <Select.Item key={country} value={country}>
-                  {country}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
-          <Select
-            name="currency_code"
-            required
-            autoComplete="currency"
-            data-testid="company-currency-input"
-          >
-            <Select.Trigger className="rounded-full h-10 px-4">
-              <Select.Value placeholder="Select a currency" />
-            </Select.Trigger>
-            <Select.Content>
-              {[...new Set(currencies)].map((currency) => (
-                <Select.Item key={currency} value={currency}>
-                  {currency.toUpperCase()} ({currencySymbolMap[currency]})
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
+            <Input
+              label="Company address"
+              name="company_address"
+              required
+              autoComplete="address"
+              data-testid="company-address-input"
+              className="bg-white"
+            /> */}
+
         </div>
         <div className="border-b border-neutral-200 my-6" />
-        <ErrorMessage error={message} data-testid="register-error" />
-        <div className="flex items-center gap-2">
+        <ErrorMessage error={message?.error} data-testid="register-error" />
+        {/* <div className="flex items-center gap-2">
           <Checkbox
             name="terms"
             id="terms-checkbox"
@@ -168,11 +72,11 @@ const Register = ({ setCurrentView, regions }: Props) => {
           >
             I agree to the terms and conditions.
           </Label>
-        </div>
+        </div> */}
         <SubmitButton
           className="w-full mt-6"
           data-testid="register-button"
-          disabled={!termsAccepted}
+        // disabled={!termsAccepted}
         >
           Register
         </SubmitButton>
