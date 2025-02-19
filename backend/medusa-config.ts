@@ -1,9 +1,10 @@
-import { QUOTE_MODULE } from "./src/modules/quote";
-import { APPROVAL_MODULE } from "./src/modules/approval";
-import { COMPANY_MODULE } from "./src/modules/company";
-import { loadEnv, defineConfig, Modules } from "@medusajs/framework/utils";
+import { QUOTE_MODULE } from "./src/modules/quote"
+import { APPROVAL_MODULE } from "./src/modules/approval"
+import { COMPANY_MODULE } from "./src/modules/company"
+import { loadEnv, defineConfig, Modules } from "@medusajs/framework/utils"
+import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
 
-loadEnv(process.env.NODE_ENV!, process.cwd());
+loadEnv(process.env.NODE_ENV!, process.cwd())
 
 module.exports = defineConfig({
   // admin: {
@@ -26,6 +27,9 @@ module.exports = defineConfig({
     [QUOTE_MODULE]: {
       resolve: "./modules/quote",
     },
+    [MOBILE_OTP_MODULE]: {
+      resolve: "./modules/mobile-otp",
+    },
     [APPROVAL_MODULE]: {
       resolve: "./modules/approval",
     },
@@ -36,4 +40,4 @@ module.exports = defineConfig({
       resolve: "@medusajs/medusa/workflow-engine-inmemory",
     },
   },
-});
+})
