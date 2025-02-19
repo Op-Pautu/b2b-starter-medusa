@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 export default async function Cart() {
   const cart = await retrieveCart().catch(() => null)
   const customer = await retrieveCustomer()
-
   return (
     <CartProvider cart={cart}>
       <CartTemplate customer={customer} />

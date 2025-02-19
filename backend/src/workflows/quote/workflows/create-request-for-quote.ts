@@ -1,8 +1,10 @@
 import {
   beginOrderEditOrderWorkflow,
+  confirmOrderEditRequestWorkflow,
   createOrdersWorkflow,
   useRemoteQueryStep,
 } from "@medusajs/core-flows";
+import { updateOrderWorkflow } from "../../order/workflows/update-order";
 import { OrderStatus } from "@medusajs/framework/utils";
 import {
   createWorkflow,
@@ -10,13 +12,14 @@ import {
   WorkflowResponse,
 } from "@medusajs/workflows-sdk";
 import { createQuotesWorkflow } from "./create-quote";
+import { updateQuotesWorkflow } from "src/workflows/quote/workflows/update-quote";
 
 /*
-  A workflow that creates a request for quote. 
-  
+  A workflow that creates a request for quote.
+
   Quotes contain links to a draft order, customer and cart. Any changes (updated price, quantity, etc) made on the quote
   is performed within the scope of a draft order. We then re-use the order edit functionality of the order to stage
-  any changes to the quote made by the merchant. 
+  any changes to the quote made by the merchant.
 
   The customer can then accept or reject the changes. The lifecycle of the quote is managed through its status,
   that is performed by independent workflows - accept / reject.
@@ -54,7 +57,7 @@ export const createRequestForQuoteWorkflow = createWorkflow(
 
     const orderInput = transform({ cart, customer }, ({ cart, customer }) => {
       return {
-        is_draft_order: true,
+        is_draft_order: false,
         status: OrderStatus.DRAFT,
         sales_channel_id: cart.sales_channel_id,
         email: customer.email,
@@ -95,6 +98,24 @@ export const createRequestForQuoteWorkflow = createWorkflow(
           order_change_id: changeOrder.id,
         },
       ],
+    });
+    updateQuotesWorkflow.runAsStep({
+      input: [{ id: quotes[0].id, status: "accepted" }],
+    });
+
+    confirmOrderEditRequestWorkflow.runAsStep({
+      input: {
+        order_id: draftOrder.id,
+        confirmed_by: input.customer_id,
+      },
+    });
+
+    updateOrderWorkflow.runAsStep({
+      input: {
+        id: draftOrder.id,
+        is_draft_order: false,
+        status: OrderStatus.PENDING,
+      },
     });
 
     return new WorkflowResponse({ quote: quotes[0] });

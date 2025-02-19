@@ -24,7 +24,8 @@ const ItemsTemplate = ({
     [cart?.items]
   )
 
-  const { isPendingApproval } = getCartApprovalStatus(cart)
+  const { isPendingAdminApproval, isPendingSalesManagerApproval } =
+    getCartApprovalStatus(cart)
 
   return (
     <div className="w-full flex flex-col gap-y-2">
@@ -33,7 +34,10 @@ const ItemsTemplate = ({
           items.map((item: StoreCartLineItem) => {
             return (
               <ItemFull
-                disabled={isPendingApproval}
+                // disabled={isPendingApproval}
+                disabled={
+                  isPendingAdminApproval || isPendingSalesManagerApproval
+                }
                 currencyCode={cart?.currency_code}
                 showBorders={showBorders}
                 key={item.id}
