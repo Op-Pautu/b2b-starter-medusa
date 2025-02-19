@@ -1,3 +1,4 @@
+import { MobileOtp } from ".medusa/types/query-entry-points"
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
@@ -35,7 +36,7 @@ export async function POST(req: MedusaRequest<Input>, res: MedusaResponse) {
       filters: { phone },
     })
 
-    let mobileOtpTable
+    let mobileOtpTable: MobileOtp
 
     if (existingOtp.length === 0) {
       mobileOtpTable = await mobileOtpService.createMobileOtps({

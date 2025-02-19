@@ -58,11 +58,23 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
+type MobileOtp = {
+  id: string
+  phone: string
+  attempt_count: number
+  otp_hash: string
+  expires_at: Date
+  is_valid: boolean
+  created_at: Date
+  updated_at: Date
+  deleted_at: Date | null
+}
+
 interface OtpResponse {
   success: boolean
   error: null | string
   otp?: string
-  mobileOtpTableId?: string
+  mobileOtpTable?: MobileOtp
 }
 
 interface VerificationResponse {
@@ -78,6 +90,7 @@ export async function sendOtp(
 ): Promise<OtpResponse> {
   const phone = formData.get("phone_number") as string
   console.log({ phone })
+
   if (!phone?.trim()) {
     return {
       success: false,
@@ -95,19 +108,19 @@ export async function sendOtp(
       }
     )
 
-    const { error, success, otp, mobileOtpTableId } = res
+    const { error, success, otp, mobileOtpTable } = res
     if (res.error) {
       throw new Error(res.error)
     }
 
     console.log("otp:", otp)
-    console.log("mobileOtpTableId:", mobileOtpTableId)
+    console.log("mobileOtpTableId:", mobileOtpTable?.id)
 
     return {
       success: true,
       error: null,
       otp: otp,
-      // mobileOtpTableId: mobileOtpTable.id,
+      mobileOtpTable: mobileOtpTable,
     }
   } catch (err) {
     console.error("OTP Request Error:", err)
@@ -118,51 +131,48 @@ export async function sendOtp(
   }
 }
 
-export async function otpVerification(
+export async function otpVerify(
   _currentState: unknown,
   formData: FormData
 ): Promise<VerificationResponse> {
-  const otpTableId = formData.get("mobileOtpTableId") as string
-  const otpValue = formData.get("otp") as string
+  const otpRecordId = formData.get("otp_record_id") as string
+  const otpValue = formData.get("otp_value") as string
 
-  if (!otpValue?.trim() || !otpTableId?.trim()) {
+  console.log("inside server action: ", otpRecordId)
+
+  if (!otpValue?.trim() || !otpRecordId?.trim()) {
     return {
       success: false,
-      error: "OTP and table ID are required",
+      error: "OTP and record ID are required",
     }
   }
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/login-with-otp/verify`,
+    const res = await sdk.client.fetch<VerificationResponse>(
+      `/store/login-with-otp/verify`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          otp: otpValue,
-          otpTableId: otpTableId,
-        }),
-        cache: "no-store",
+        body: { otpValue, otpRecordId },
       }
     )
-
-    if (!res.ok) {
-      const error = await res.text()
+    const { success, token, customer, error } = res
+    console.log({ customer })
+    if (error) {
+      console.log("error: ", error)
       throw new Error(error)
     }
-
-    const data = await res.json()
-
-    if (data.token) {
-      setAuthToken(data.token)
+    console.log("token: ", token)
+    if (token) {
+      setAuthToken(token)
       track("customer_logged_in")
     }
 
     return {
       success: true,
       error: null,
-      token: data.token,
-      customer: data.customer,
+      token: token,
+      customer: customer,
     }
   } catch (err) {
     console.error("OTP Verification Error:", err)

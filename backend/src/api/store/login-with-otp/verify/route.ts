@@ -6,19 +6,20 @@ import {
 } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import jwt from "jsonwebtoken"
+
 import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
 import MobileOtpModuleService from "src/modules/mobile-otp/service"
 import { verifyOTP } from "src/utils/otp"
 
 type Input = {
-  otp: string
-  otpTableId: string
+  otpValue: string
+  otpRecordId: string
   phone?: string
 }
 export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
-  const { otp, otpTableId } = req.body
+  const { otpValue, otpRecordId } = req.body
 
-  if (!otp?.trim() || !otpTableId?.trim()) {
+  if (!otpValue?.trim() || !otpRecordId?.trim()) {
     return res.status(400).json({
       success: false,
       message: "OTP and table ID are required",
@@ -32,7 +33,7 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
     const { data: otpTable } = await query.graph({
       entity: "mobile_otp",
       fields: ["*"],
-      filters: { id: otpTableId },
+      filters: { id: otpRecordId },
     })
 
     if (!otpTable?.length) {
@@ -45,10 +46,10 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
     const otpData = otpTable[0]
 
     // Verify OTP hash
-    if (!verifyOTP(otp, otpData.otp_hash)) {
+    if (!verifyOTP(otpValue, otpData.otp_hash)) {
       // Increment attempt count
       await mobileOtpService.updateMobileOtps({
-        id: otpTableId,
+        id: otpRecordId,
         attempt_count: otpData.attempt_count + 1,
         is_valid: otpData.attempt_count < 2,
       })
@@ -145,7 +146,7 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
 
     // Invalidate the OTP after successful verification
     await mobileOtpService.updateMobileOtps({
-      id: otpTableId,
+      id: otpRecordId,
       is_valid: false,
     })
     return res.json({
