@@ -1,5 +1,5 @@
-import { model } from "@medusajs/framework/utils";
-import { Employee } from "./employee";
+import { model } from "@medusajs/framework/utils"
+import { Employee } from "./employee"
 
 export const Company = model.define("company", {
   id: model
@@ -8,7 +8,7 @@ export const Company = model.define("company", {
     })
     .primaryKey(),
   name: model.text(),
-  email: model.text(),
+  email: model.text().nullable(),
   phone: model.text().nullable(),
   address: model.text().nullable(),
   city: model.text().nullable(),
@@ -21,4 +21,4 @@ export const Company = model.define("company", {
     .enum(["never", "daily", "weekly", "monthly", "yearly"])
     .default("monthly"),
   employees: model.hasMany(() => Employee),
-});
+})

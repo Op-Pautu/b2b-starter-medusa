@@ -43,13 +43,13 @@ export const createCompany = async (data: StoreCreateCompany) => {
   const headers = {
     ...(await getAuthHeaders()),
   }
-
+  console.log("retrieving headers in createCompany", headers)
   const {
     companies: [company],
   } = await sdk.client.fetch<StoreCompaniesResponse>(`/store/companies`, {
     method: "POST",
     body: data,
-    headers,
+    headers: headers,
   })
 
   track("company_created", {

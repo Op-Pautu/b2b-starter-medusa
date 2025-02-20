@@ -12,7 +12,9 @@ type Input = {
   phone: string
 }
 export async function POST(req: MedusaRequest<Input>, res: MedusaResponse) {
-  const phone = req.body.phone?.trim()
+  console.log("req.body:", req.body)
+  console.log("req.body.phone type:", typeof req.body.phone)
+  const phone = req.body.phone.trim()
 
   if (!phone) {
     return res.status(400).json({

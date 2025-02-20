@@ -18,6 +18,7 @@ import {
   setAuthToken,
 } from "./cookies"
 import { retrieveCart, updateCart } from "./cart"
+import { QueryCompany, StoreEmployeeResponse } from "@starter/types"
 
 export const retrieveCustomer = async (): Promise<B2BCustomer | null> => {
   const headers = {
@@ -82,6 +83,10 @@ interface VerificationResponse {
   error: null | string
   message?: string
   customer?: any
+  company?: QueryCompany
+  employee?: void | StoreEmployeeResponse
+  authIdentityId?: string
+  token?: string
 }
 
 export async function sendOtp(
@@ -104,6 +109,7 @@ export async function sendOtp(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: { phone },
+        credentials: "include",
       }
     )
 
@@ -154,22 +160,22 @@ export async function otpVerify(
       }
     )
 
-    const { success, message, error, customer } = res
+    const { success, message, error, customer, token } = res
 
     if (error) {
       throw new Error(error)
     }
-    const loginToken = await sdk.client.fetch<{ token: string }>(
-      `/auth/customer/my-auth`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: { phone: customer.phone, otp: otpValue },
-      }
-    )
-    if (!loginToken) {
-      throw new Error("Login failed. No token received.")
-    }
+    // const loginToken = await sdk.client.fetch<{ token: string }>(
+    //   `/auth/customer/my-auth`,
+    //   {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: { phone: customer.phone, otp: otpValue },
+    //   }
+    // )
+    // if (!loginToken) {
+    //   throw new Error("Login failed. No token received.")
+    // }
 
     // const loginToken = await sdk.auth.login("customer", "my-auth", {
     //   phone: res.customer.phone,
@@ -178,38 +184,43 @@ export async function otpVerify(
     // if (!loginToken) {
     //   throw new Error("Login failed. No token received.")
     // }
-    for (let key of formData.keys()) {
-      console.log("Form key:", key)
-    }
-    const customHeaders = { authorization: `Bearer ${loginToken}` }
+    console.log({ token })
+    const customHeaders = { authorization: `Bearer ${token}` }
 
-    setAuthToken(loginToken.token as string)
+    setAuthToken(token as string)
 
     const companyForm = {
       name: formData.get("company_name") as string,
       phone: formData.get("phone_number") as string,
       address: formData.get("company_address") as string,
+      email: "",
     }
-    // const createdCompany = await createCompany(companyForm)
-    // if (createdCompany) {
-    //   track("company_created", {
-    //     company_id: createdCompany.id,
-    //   })
-    // }
-    // const createdEmployee = await createEmployee({
-    //   company_id: createdCompany?.id as string,
-    //   customer_id: customer.id,
-    //   is_admin: true,
-    //   spending_limit: 0,
-    // }).catch((err) => {
-    //   console.log("error creating employee", err)
-    // })
 
-    // if (createdEmployee) {
-    //   track("employee_created", {
-    //     employee_id: createdEmployee.employee.id,
-    //   })
-    // }
+    console.log(companyForm.name)
+    const createdCompany = await createCompany(companyForm)
+    if (!createdCompany) {
+      throw new Error("Failed to create company")
+    }
+
+    if (createdCompany) {
+      track("company_created", {
+        company_id: createdCompany.id,
+      })
+    }
+    const createdEmployee = await createEmployee({
+      company_id: createdCompany?.id as string,
+      customer_id: customer.id,
+      is_admin: true,
+      spending_limit: 0,
+    }).catch((err) => {
+      console.log("error creating employee", err)
+    })
+
+    if (createdEmployee) {
+      track("employee_created", {
+        employee_id: createdEmployee.employee.id,
+      })
+    }
     const cacheTag = await getCacheTag("customers")
 
     revalidateTag(cacheTag)
@@ -220,11 +231,14 @@ export async function otpVerify(
       error: null,
       message: message,
       customer: res.customer,
-      // company: createdCompany,
-      // employee: createdEmployee,
+      company: createdCompany,
+      employee: createdEmployee,
     }
   } catch (err) {
-    console.error("OTP Verification Error:", err)
+    console.error(
+      "OTP Verification Error:",
+      err instanceof Error ? err.message : "Verification failed"
+    )
     return {
       success: false,
       error: err instanceof Error ? err.message : "Verification failed",

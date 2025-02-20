@@ -1,6 +1,6 @@
 "use client"
 
-import { otpVerify, sendOtp, signup } from "@lib/data/customer"
+import { otpVerify, sendOtp } from "@lib/data/customer"
 import { Text } from "@medusajs/ui"
 
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
@@ -25,12 +25,14 @@ const Register = ({ setCurrentView }: Props) => {
   const [otpTableId, setOtpTableId] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpValue, setOtpValue] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
 
   useEffect(() => {
     if (message?.success && message.mobileOtpTable) {
       setOtpTableId(message.mobileOtpTable.id);
       // Clear OTP input when moving to step 2
-      setOtpValue("");
+      // setOtpValue("");
       setCurrentStep(2);
     }
   }, [message]);
@@ -57,6 +59,7 @@ const Register = ({ setCurrentView }: Props) => {
               label="Company name"
               name="company_name"
               required
+              onChange={(e) => setCompanyName(e.target.value)}
               autoComplete="organization"
               data-testid="company-name-input"
               className="bg-white"
@@ -66,6 +69,7 @@ const Register = ({ setCurrentView }: Props) => {
               name="company_address"
               required
               autoComplete="address"
+              onChange={(e) => setCompanyAddress(e.target.value)}
               data-testid="company-address-input"
               className="bg-white"
             />
@@ -106,6 +110,8 @@ const Register = ({ setCurrentView }: Props) => {
             name="phone_number"
             value={phoneNumber}
           />
+          <input type="hidden" name="company_name" value={companyName} />
+          <input type="hidden" name="company_address" value={companyAddress} />
           <Text className="text-sm text-neutral-700">
             OTP sent to {phoneNumber}
           </Text>
@@ -129,35 +135,35 @@ const Register = ({ setCurrentView }: Props) => {
       </form>
     )
   }
-  const renderCustomerStep = () => {
-    return (
-      <form className="w-full flex flex-col" action={validationFormAction}>
-        <div className="flex flex-col w-full gap-y-4">
-          <Input
-            label="Company name"
-            name="company_name"
-            required
-            autoComplete="organization"
-            data-testid="company-name-input"
-            className="bg-white"
-          />
-          <Input
-            label="Company address"
-            name="company_address"
-            required
-            autoComplete="address"
-            data-testid="company-address-input"
-            className="bg-white"
-          />
-        </div>
-        <SubmitButton className="w-full mt-6">
-          Verify OTP
-        </SubmitButton>
-        <div className="border-b border-neutral-200 my-6" />
-        <ErrorMessage error={validationMessage?.error} data-testid="verify-error" />
-      </form>
-    )
-  }
+  // const renderCustomerStep = () => {
+  //   return (
+  //     <form className="w-full flex flex-col" action={validationFormAction}>
+  //       <div className="flex flex-col w-full gap-y-4">
+  //         <Input
+  //           label="Company name"
+  //           name="company_name"
+  //           required
+  //           autoComplete="organization"
+  //           data-testid="company-name-input"
+  //           className="bg-white"
+  //         />
+  //         <Input
+  //           label="Company address"
+  //           name="company_address"
+  //           required
+  //           autoComplete="address"
+  //           data-testid="company-address-input"
+  //           className="bg-white"
+  //         />
+  //       </div>
+  //       <SubmitButton className="w-full mt-6">
+  //         Verify OTP
+  //       </SubmitButton>
+  //       <div className="border-b border-neutral-200 my-6" />
+  //       <ErrorMessage error={validationMessage?.error} data-testid="verify-error" />
+  //     </form>
+  //   )
+  // }
   return (
     <div
       className="max-w-sm w-full h-full flex flex-col justify-center gap-6 my-auto"

@@ -86,6 +86,7 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
         message: authResult.error,
       })
     }
+    console.log("authResult", authResult)
 
     const { data: customers } = await query.graph({
       entity: "customer",
@@ -98,6 +99,7 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
     if (!customer) {
       const newCustomer = await customerService.createCustomers({
         phone: otpData.phone,
+        has_account: true,
       })
 
       if (!newCustomer) {
@@ -124,37 +126,40 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
       console.log("customer.phone", customer?.phone)
     }
 
-    // const { jwtSecret } = req.scope.resolve("configModule").projectConfig.http
+    const { jwtSecret } = req.scope.resolve("configModule").projectConfig.http
+    console.log({ jwtSecret })
+    // Ensure jwtSecret exists
+    if (!jwtSecret) {
+      throw new Error("JWT secret is not configured")
+    }
 
-    // // Ensure jwtSecret exists
-    // if (!jwtSecret) {
-    //   throw new Error("JWT secret is not configured")
-    // }
-
-    // const token = jwt.sign(
-    //   {
-    //     actor_id: customer.id,
-    //     actor_type: "customer",
-    //     auth_identity_id: authResult.authIdentity?.id || undefined,
-    //     app_metadata: {
-    //       customer_id: customer.id,
-    //     },
-    //     iat: Math.floor(Date.now() / 1000),
-    //     exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
-    //   },
-    //   jwtSecret as string
-    // )
+    const token = jwt.sign(
+      {
+        actor_id: customer.id,
+        actor_type: "customer",
+        auth_identity_id: authResult.authIdentity?.id || undefined,
+        app_metadata: {
+          customer_id: customer.id,
+        },
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
+      },
+      jwtSecret as string
+    )
 
     // Invalidate the OTP after successful verification
     await mobileOtpService.updateMobileOtps({
       id: otpRecordId,
       is_valid: false,
     })
+    console.log({ customer })
     return res.json({
       success: true,
       message: "OTP verified successfully",
       customer,
+      token,
       error: authResult.error,
+      authIdentityId: authResult.authIdentity?.id,
     })
   } catch (error) {
     console.error("Verify OTP Error:", error)

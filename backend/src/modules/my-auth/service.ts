@@ -60,6 +60,7 @@ class MyAuthProviderService extends AbstractAuthModuleProvider {
         error: "Invalid request body please provide phone number",
       }
     }
+    console.log("data.body", data.body)
     try {
       await authIdentityProviderService.retrieve({
         entity_id: data.body.phone, // email or some ID
@@ -73,6 +74,7 @@ class MyAuthProviderService extends AbstractAuthModuleProvider {
         const createdAuthIdentity = await authIdentityProviderService.create({
           entity_id: data.body.phone, // email or some ID
         })
+        console.log("createdAuthIdentity", createdAuthIdentity)
         return {
           success: true,
           authIdentity: createdAuthIdentity,
