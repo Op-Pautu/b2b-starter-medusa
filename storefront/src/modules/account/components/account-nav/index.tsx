@@ -14,10 +14,8 @@ import { B2BCustomer } from "types/global"
 
 const AccountNav = ({
   customer,
-  numPendingApprovals,
 }: {
   customer: B2BCustomer | null
-  numPendingApprovals: number
 }) => {
   const route = usePathname()
 
@@ -201,7 +199,7 @@ const AccountNav = ({
                 Orders
               </AccountNavLink>
             </li>
-            {customer?.employee?.is_admin && (
+            {/* {customer?.employee?.is_admin && (
               <li>
                 <AccountNavLink
                   href="/account/approvals"
@@ -216,7 +214,7 @@ const AccountNav = ({
                   )}
                 </AccountNavLink>
               </li>
-            )}
+            )} */}
             <li>
               <AccountNavLink
                 href="/account/quotes"

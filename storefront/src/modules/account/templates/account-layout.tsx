@@ -1,5 +1,4 @@
-import { listApprovals } from "@lib/data/approvals"
-import { ApprovalStatusType, ApprovalType } from "@starter/types/approval"
+
 import React from "react"
 import { B2BCustomer } from "types/global"
 import AccountNav from "../components/account-nav"
@@ -13,12 +12,6 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
   customer,
   children,
 }) => {
-  const { carts_with_approvals } = await listApprovals({
-    type: ApprovalType.ADMIN,
-    status: ApprovalStatusType.PENDING,
-  })
-
-  const numPendingApprovals = carts_with_approvals?.length || 0
 
   return (
     <div
@@ -31,7 +24,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
             {customer && (
               <AccountNav
                 customer={customer}
-                numPendingApprovals={numPendingApprovals}
+
               />
             )}
           </div>
