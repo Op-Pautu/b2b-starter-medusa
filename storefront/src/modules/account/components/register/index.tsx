@@ -17,15 +17,14 @@ type Props = {
 
 
 const Register = ({ setCurrentView }: Props) => {
+  const [message, formAction] = useActionState(sendOtp, null)
+  const [validationMessage, validationFormAction] = useActionState(otpVerify, null);
+
   const [currentStep, setCurrentStep] = useState(1);
 
   const [otpTableId, setOtpTableId] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpValue, setOtpValue] = useState("");
-
-
-  const [message, formAction] = useActionState(sendOtp, null)
-  const [validationMessage, validationFormAction] = useActionState(otpVerify, null);
 
   useEffect(() => {
     if (message?.success && message.mobileOtpTable) {
@@ -52,6 +51,22 @@ const Register = ({ setCurrentView }: Props) => {
               pattern="[0-9]*"
               autoComplete="phone-number"
               data-testid="phone-number-input"
+              className="bg-white"
+            />
+            <Input
+              label="Company name"
+              name="company_name"
+              required
+              autoComplete="organization"
+              data-testid="company-name-input"
+              className="bg-white"
+            />
+            <Input
+              label="Company address"
+              name="company_address"
+              required
+              autoComplete="address"
+              data-testid="company-address-input"
               className="bg-white"
             />
           </div>
@@ -114,35 +129,35 @@ const Register = ({ setCurrentView }: Props) => {
       </form>
     )
   }
-  // const renderCustomerStep = () => {
-  //   return (
-  //     <form className="w-full flex flex-col" action={validationFormAction}>
-  //       <div className="flex flex-col w-full gap-y-4">
-  //         <Input
-  //           label="Company name"
-  //           name="company_name"
-  //           required
-  //           autoComplete="organization"
-  //           data-testid="company-name-input"
-  //           className="bg-white"
-  //         />
-  //         <Input
-  //           label="Company address"
-  //           name="company_address"
-  //           required
-  //           autoComplete="address"
-  //           data-testid="company-address-input"
-  //           className="bg-white"
-  //         />
-  //       </div>
-  //       <SubmitButton className="w-full mt-6">
-  //         Verify OTP
-  //       </SubmitButton>
-  //       <div className="border-b border-neutral-200 my-6" />
-  //       <ErrorMessage error={validationMessage?.error} data-testid="verify-error" />
-  //     </form>
-  //   )
-  // }
+  const renderCustomerStep = () => {
+    return (
+      <form className="w-full flex flex-col" action={validationFormAction}>
+        <div className="flex flex-col w-full gap-y-4">
+          <Input
+            label="Company name"
+            name="company_name"
+            required
+            autoComplete="organization"
+            data-testid="company-name-input"
+            className="bg-white"
+          />
+          <Input
+            label="Company address"
+            name="company_address"
+            required
+            autoComplete="address"
+            data-testid="company-address-input"
+            className="bg-white"
+          />
+        </div>
+        <SubmitButton className="w-full mt-6">
+          Verify OTP
+        </SubmitButton>
+        <div className="border-b border-neutral-200 my-6" />
+        <ErrorMessage error={validationMessage?.error} data-testid="verify-error" />
+      </form>
+    )
+  }
   return (
     <div
       className="max-w-sm w-full h-full flex flex-col justify-center gap-6 my-auto"
@@ -167,66 +182,7 @@ const Register = ({ setCurrentView }: Props) => {
       </span>
     </div>
   );
-  // return (
-  //   <div
-  //     className="max-w-sm flex flex-col items-start gap-2 my-8"
-  //     data-testid="register-page"
-  //   >
-  //     <Text className="text-4xl text-neutral-950 text-left mb-4">
-  //       Create your
-  //       <br />
-  //       company account.
-  //     </Text>
-  //     <form className="w-full flex flex-col" action={formAction}>
-  //       <div className="flex flex-col w-full gap-y-4">
-  //         <Input
-  //           label="Phone Number"
-  //           name="phone_number"
-  //           required
-  //           autoComplete="phone-number"
-  //           data-testid="phone-number-input"
-  //           className="bg-white"
-  //         />
-  //         {/* <Input
-  //           label="Company name"
-  //           name="company_name"
-  //           required
-  //           autoComplete="organization"
-  //           data-testid="company-name-input"
-  //           className="bg-white"
-  //         />
-  //           <Input
-  //             label="Company address"
-  //             name="company_address"
-  //             required
-  //             autoComplete="address"
-  //             data-testid="company-address-input"
-  //             className="bg-white"
-  //           /> */}
 
-  //       </div>
-  //       <div className="border-b border-neutral-200 my-6" />
-  //       <ErrorMessage error={message?.error} data-testid="register-error" />
-
-  //       <SubmitButton
-  //         className="w-full mt-6"
-  //         data-testid="register-button"
-  //       >
-  //         Register
-  //       </SubmitButton>
-  //     </form>
-  //     <span className="text-center text-ui-fg-base text-small-regular mt-6">
-  //       Already a member?{" "}
-  //       <button
-  //         onClick={() => setCurrentView(LOGIN_VIEW.LOG_IN)}
-  //         className="underline"
-  //       >
-  //         Log in
-  //       </button>
-  //       .
-  //     </span>
-  //   </div>
-  // )
 }
 
 

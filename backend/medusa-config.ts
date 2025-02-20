@@ -1,8 +1,13 @@
-import { QUOTE_MODULE } from "./src/modules/quote"
+import {
+  ContainerRegistrationKeys,
+  defineConfig,
+  loadEnv,
+  Modules,
+} from "@medusajs/framework/utils"
+import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
 import { APPROVAL_MODULE } from "./src/modules/approval"
 import { COMPANY_MODULE } from "./src/modules/company"
-import { loadEnv, defineConfig, Modules } from "@medusajs/framework/utils"
-import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
+import { QUOTE_MODULE } from "./src/modules/quote"
 
 loadEnv(process.env.NODE_ENV!, process.cwd())
 
@@ -38,6 +43,24 @@ module.exports = defineConfig({
     },
     [Modules.WORKFLOW_ENGINE]: {
       resolve: "@medusajs/medusa/workflow-engine-inmemory",
+    },
+    [Modules.AUTH]: {
+      resolve: "@medusajs/medusa/auth",
+      options: {
+        providers: [
+          // default provider
+          {
+            resolve: "@medusajs/medusa/auth-emailpass",
+            dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+            id: "emailpass",
+          },
+          {
+            resolve: "./src/modules/my-auth",
+            id: "my-auth",
+            dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+          },
+        ],
+      },
     },
   },
 })

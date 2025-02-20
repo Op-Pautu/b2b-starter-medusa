@@ -121,28 +121,29 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
       }
 
       customer = fetchedCustomers[0]
+      console.log("customer.phone", customer?.phone)
     }
 
-    const { jwtSecret } = req.scope.resolve("configModule").projectConfig.http
+    // const { jwtSecret } = req.scope.resolve("configModule").projectConfig.http
 
-    // Ensure jwtSecret exists
-    if (!jwtSecret) {
-      throw new Error("JWT secret is not configured")
-    }
+    // // Ensure jwtSecret exists
+    // if (!jwtSecret) {
+    //   throw new Error("JWT secret is not configured")
+    // }
 
-    const token = jwt.sign(
-      {
-        actor_id: customer.id,
-        actor_type: "customer",
-        auth_identity_id: authResult.authIdentity?.id || undefined,
-        app_metadata: {
-          customer_id: customer.id,
-        },
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
-      },
-      jwtSecret as string
-    )
+    // const token = jwt.sign(
+    //   {
+    //     actor_id: customer.id,
+    //     actor_type: "customer",
+    //     auth_identity_id: authResult.authIdentity?.id || undefined,
+    //     app_metadata: {
+    //       customer_id: customer.id,
+    //     },
+    //     iat: Math.floor(Date.now() / 1000),
+    //     exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
+    //   },
+    //   jwtSecret as string
+    // )
 
     // Invalidate the OTP after successful verification
     await mobileOtpService.updateMobileOtps({
@@ -153,7 +154,7 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
       success: true,
       message: "OTP verified successfully",
       customer,
-      token,
+      error: authResult.error,
     })
   } catch (error) {
     console.error("Verify OTP Error:", error)

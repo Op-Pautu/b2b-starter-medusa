@@ -80,7 +80,7 @@ interface OtpResponse {
 interface VerificationResponse {
   success: boolean
   error: null | string
-  token?: string
+  message?: string
   customer?: any
 }
 
@@ -89,7 +89,6 @@ export async function sendOtp(
   formData: FormData
 ): Promise<OtpResponse> {
   const phone = formData.get("phone_number") as string
-  console.log({ phone })
 
   if (!phone?.trim()) {
     return {
@@ -138,8 +137,6 @@ export async function otpVerify(
   const otpRecordId = formData.get("otp_record_id") as string
   const otpValue = formData.get("otp_value") as string
 
-  console.log("inside server action: ", otpRecordId)
-
   if (!otpValue?.trim() || !otpRecordId?.trim()) {
     return {
       success: false,
@@ -156,23 +153,40 @@ export async function otpVerify(
         body: { otpValue, otpRecordId },
       }
     )
-    const { success, token, customer, error } = res
-    console.log({ customer })
+
+    const { success, message, error } = res
+
     if (error) {
-      console.log("error: ", error)
       throw new Error(error)
     }
-    console.log("token: ", token)
-    if (token) {
-      setAuthToken(token)
-      track("customer_logged_in")
-    }
+    track("customer:", res.customer)
+
+    const loginToken = await sdk.auth.login("customer", "my-auth", {
+      phone: res.customer.phone,
+      otp: otpValue,
+    })
+    const customHeaders = { authorization: `Bearer ${loginToken}` }
+
+    setAuthToken(loginToken as string)
+
+    // const companyForm = {
+    //   name: formData.get("company_name") as string,
+    //   phone: formData.get("phone_number") as string,
+    //   address: formData.get("company_address") as string,
+    // }
+    // const createdCompany = await createCompany(companyForm)
+
+    await transferCart()
+
+    const cacheTag = await getCacheTag("customers")
+
+    revalidateTag(cacheTag)
 
     return {
       success: true,
       error: null,
-      token: token,
-      customer: customer,
+      message: message,
+      customer: res.customer,
     }
   } catch (err) {
     console.error("OTP Verification Error:", err)
@@ -198,7 +212,6 @@ export async function signup(_currentState: unknown, formData: FormData) {
       email: customerForm.email,
       password: password,
     })
-
     const customHeaders = { authorization: `Bearer ${token}` }
 
     const { customer: createdCustomer } = await sdk.store.customer.create(
