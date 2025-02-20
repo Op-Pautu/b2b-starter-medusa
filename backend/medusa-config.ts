@@ -5,7 +5,6 @@ import {
   Modules,
 } from "@medusajs/framework/utils"
 import { MOBILE_OTP_MODULE } from "src/modules/mobile-otp"
-import { APPROVAL_MODULE } from "./src/modules/approval"
 import { COMPANY_MODULE } from "./src/modules/company"
 import { QUOTE_MODULE } from "./src/modules/quote"
 
@@ -35,9 +34,7 @@ module.exports = defineConfig({
     [MOBILE_OTP_MODULE]: {
       resolve: "./modules/mobile-otp",
     },
-    [APPROVAL_MODULE]: {
-      resolve: "./modules/approval",
-    },
+
     [Modules.CACHE]: {
       resolve: "@medusajs/medusa/cache-inmemory",
     },

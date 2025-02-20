@@ -8,7 +8,6 @@ import Divider from "@modules/common/components/divider"
 
 import { setBillingAddress, updateCart } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
-import { getCartApprovalStatus } from "@lib/util/get-cart-approval-status"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { useCallback, useState } from "react"
 import { B2BCart } from "types/global"

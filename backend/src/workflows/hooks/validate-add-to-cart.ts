@@ -1,10 +1,9 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
-import { StepResponse } from "@medusajs/framework/workflows-sdk";
-import { addToCartWorkflow } from "@medusajs/medusa/core-flows";
-import { getCartApprovalStatus } from "../../utils/get-cart-approval-status";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { StepResponse } from "@medusajs/framework/workflows-sdk"
+import { addToCartWorkflow } from "@medusajs/medusa/core-flows"
 
 addToCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
   const {
     data: [queryCart],
@@ -14,13 +13,7 @@ addToCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
     filters: {
       id: cart.id,
     },
-  });
+  })
 
-  const { isPendingApproval } = getCartApprovalStatus(queryCart);
-
-  if (isPendingApproval) {
-    throw new Error("Cart is pending approval");
-  }
-
-  return new StepResponse(undefined, null);
-});
+  return new StepResponse(undefined, null)
+})

@@ -2,7 +2,6 @@
 
 import { sdk } from "@lib/config"
 import { getAuthHeaders, getCacheOptions, getCacheTag } from "@lib/data/cookies"
-import { getCartApprovalStatus } from "@lib/util/get-cart-approval-status"
 import { FilterType } from "@starter/types"
 import {
   ApprovalStatusType,
@@ -87,16 +86,4 @@ export const updateApproval = async (
   revalidateTag(cartTag)
 
   return approval
-}
-
-export const startApprovalFlow = async (approvalId: string, cartId: string) => {
-  await updateApproval(approvalId, ApprovalStatusType.APPROVED)
-
-  const cart = await retrieveCart(cartId)
-
-  const { isPendingAdminApproval } = getCartApprovalStatus(cart)
-
-  if (!isPendingAdminApproval) {
-    redirect(`/checkout?cartId=${cartId}&step=payment`)
-  }
 }

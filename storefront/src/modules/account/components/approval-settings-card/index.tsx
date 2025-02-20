@@ -1,6 +1,5 @@
 "use client"
 
-import { updateApprovalSettings } from "@lib/data/companies"
 import { InformationCircleSolid } from "@medusajs/icons"
 import {
   Container,
@@ -33,11 +32,7 @@ const ApprovalSettingsCard = ({
 
   const handleSave = async () => {
     setIsSaving(true)
-    await updateApprovalSettings(company.id, requiresAdminApproval).catch(
-      () => {
-        toast.error("Error updating approval settings")
-      }
-    )
+
     setIsSaving(false)
     setIsEditing(false)
 

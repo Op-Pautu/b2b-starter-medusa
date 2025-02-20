@@ -1,4 +1,3 @@
-import { getCartApprovalStatus } from "@lib/util/get-cart-approval-status"
 import { convertToLocale } from "@lib/util/money"
 import { StoreCartLineItem } from "@medusajs/types"
 import { Container, Text } from "@medusajs/ui"
@@ -24,8 +23,7 @@ const ItemsTemplate = ({
     [cart?.items]
   )
 
-  const { isPendingAdminApproval, isPendingSalesManagerApproval } =
-    getCartApprovalStatus(cart)
+
 
   return (
     <div className="w-full flex flex-col gap-y-2">
@@ -35,9 +33,9 @@ const ItemsTemplate = ({
             return (
               <ItemFull
                 // disabled={isPendingApproval}
-                disabled={
-                  isPendingAdminApproval || isPendingSalesManagerApproval
-                }
+                // disabled={
+                //   isPendingAdminApproval || isPendingSalesManagerApproval
+                // }
                 currencyCode={cart?.currency_code}
                 showBorders={showBorders}
                 key={item.id}
