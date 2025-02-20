@@ -10,8 +10,8 @@ export type StoreCreateCompanyType = z.infer<typeof StoreCreateCompany>
 export const StoreCreateCompany = z
   .object({
     name: z.string(),
-    email: z.string(),
-    currency_code: z.string(),
+    email: z.string().optional().nullable(),
+    currency_code: z.string().optional().nullable(),
     phone: z.string().optional().nullable(),
     address: z.string().optional().nullable(),
     city: z.string().optional().nullable(),

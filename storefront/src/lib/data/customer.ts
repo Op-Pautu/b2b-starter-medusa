@@ -154,39 +154,74 @@ export async function otpVerify(
       }
     )
 
-    const { success, message, error } = res
+    const { success, message, error, customer } = res
 
     if (error) {
       throw new Error(error)
     }
-    track("customer:", res.customer)
+    const loginToken = await sdk.client.fetch<{ token: string }>(
+      `/auth/customer/my-auth`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { phone: customer.phone, otp: otpValue },
+      }
+    )
+    if (!loginToken) {
+      throw new Error("Login failed. No token received.")
+    }
 
-    const loginToken = await sdk.auth.login("customer", "my-auth", {
-      phone: res.customer.phone,
-      otp: otpValue,
-    })
+    // const loginToken = await sdk.auth.login("customer", "my-auth", {
+    //   phone: res.customer.phone,
+    //   otp: otpValue,
+    // })
+    // if (!loginToken) {
+    //   throw new Error("Login failed. No token received.")
+    // }
+    for (let key of formData.keys()) {
+      console.log("Form key:", key)
+    }
     const customHeaders = { authorization: `Bearer ${loginToken}` }
 
-    setAuthToken(loginToken as string)
+    setAuthToken(loginToken.token as string)
 
-    // const companyForm = {
-    //   name: formData.get("company_name") as string,
-    //   phone: formData.get("phone_number") as string,
-    //   address: formData.get("company_address") as string,
-    // }
+    const companyForm = {
+      name: formData.get("company_name") as string,
+      phone: formData.get("phone_number") as string,
+      address: formData.get("company_address") as string,
+    }
     // const createdCompany = await createCompany(companyForm)
+    // if (createdCompany) {
+    //   track("company_created", {
+    //     company_id: createdCompany.id,
+    //   })
+    // }
+    // const createdEmployee = await createEmployee({
+    //   company_id: createdCompany?.id as string,
+    //   customer_id: customer.id,
+    //   is_admin: true,
+    //   spending_limit: 0,
+    // }).catch((err) => {
+    //   console.log("error creating employee", err)
+    // })
 
-    await transferCart()
-
+    // if (createdEmployee) {
+    //   track("employee_created", {
+    //     employee_id: createdEmployee.employee.id,
+    //   })
+    // }
     const cacheTag = await getCacheTag("customers")
 
     revalidateTag(cacheTag)
+    await transferCart()
 
     return {
       success: true,
       error: null,
       message: message,
       customer: res.customer,
+      // company: createdCompany,
+      // employee: createdEmployee,
     }
   } catch (err) {
     console.error("OTP Verification Error:", err)

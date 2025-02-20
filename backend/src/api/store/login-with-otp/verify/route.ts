@@ -30,20 +30,20 @@ export const POST = async (req: MedusaRequest<Input>, res: MedusaResponse) => {
   try {
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
-    const { data: otpTable } = await query.graph({
+    const { data: otpRecord } = await query.graph({
       entity: "mobile_otp",
       fields: ["*"],
       filters: { id: otpRecordId },
     })
 
-    if (!otpTable?.length) {
+    if (!otpRecord?.length) {
       return res.status(404).json({
         success: false,
         message: "OTP record not found",
       })
     }
 
-    const otpData = otpTable[0]
+    const otpData = otpRecord[0]
 
     // Verify OTP hash
     if (!verifyOTP(otpValue, otpData.otp_hash)) {
